@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threads Post Template Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #F9F5EF;
+  --warm-white: #FFFCF8;
+  --bark: #2C1F14;
+  --bark-mid: #5C3D28;
+  --bark-light: #9C7A5E;
+  --sand: #E8D9C6;
+  --sand-dark: #D5C0A5;
+  --terracotta: #C4603A;
+  --terra-soft: #F5E6DF;
+  --sage: #4A6741;
+  --sage-soft: #E4EDE2;
+  --border: #DDD0BC;
+  --muted: #7A6355;
+  --radius: 16px;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--cream);
+  color: var(--bark);
+  min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+
+/* HEADER */
+header {
+  padding: 52px 0 36px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+
+.logo-dot {
+  width: 36px;
+  height: 36px;
+  background: var(--terracotta);
+  border-radius: 50%;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+header h1 {
+  font-family: var(--serif);
+  font-size: clamp(25px, 5vw, 34px);
+  font-weight: 400;
+  color: var(--bark);
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+
+header h1 em { font-style: italic; color: var(--terracotta); }
+
+header p {
+  font-size: 15px;
+  color: var(--muted);
+  font-weight: 300;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* SCREENS */
+.screen { display: none; }
+.screen.active {
+  display: block;
+  animation: fadeUp 0.32s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* PROGRESS */
+.progress-wrap { margin-bottom: 40px; }
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-bottom: 7px;
+}
+.progress-track {
+  height: 3px;
+  background: var(--sand);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--terracotta);
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+/* QUESTION */
+.q-number {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  margin-bottom: 7px;
+}
+.q-text {
+  font-family: var(--serif);
+  font-size: clamp(19px, 3.5vw, 24px);
+  font-weight: 400;
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+.q-hint {
+  font-size: 13.5px;
+  color: var(--muted);
+  font-weight: 300;
+  margin-bottom: 20px;
+}
+.question-block { margin-bottom: 36px; }
+
+/* OPTIONS */
+.option-grid { display: grid; gap: 9px; }
+.option-grid.two-col { grid-template-columns: 1fr 1fr; }
+
+.opt {
+  background: var(--warm-white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 17px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--bark);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  line-height: 1.4;
+}
+.opt:hover { border-color: var(--terracotta); background: var(--terra-soft); }
+.opt.selected {
+  border-color: var(--terracotta);
+  background: var(--terra-soft);
+  font-weight: 500;
+  box-shadow: 0 0 0 3px rgba(196,96,58,0.11);
+}
+.opt-name { display: block; font-weight: 500; margin-bottom: 2px; }
+.opt-desc { font-size: 12.5px; color: var(--muted); font-weight: 300; }
+.opt.selected .opt-desc { color: var(--bark-light); }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 26px;
+  border-radius: 10px;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+.btn-terra { background: var(--terracotta); color: #fff; }
+.btn-terra:hover { background: #a84e2f; }
+.btn-terra:disabled { opacity: 0.38; cursor: not-allowed; }
+.btn-outline { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--bark-light); color: var(--bark); }
+.btn-ghost { background: transparent; color: var(--muted); padding: 10px 14px; font-size: 13.5px; }
+.btn-ghost:hover { color: var(--bark); }
+.btn-sage { background: var(--sage); color: #fff; }
+.btn-sage:hover { background: #3b5233; }
+.btn-sm { padding: 8px 16px; font-size: 13px; border-radius: 8px; }
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+/* RESULTS SCREEN */
+.screen-title {
+  font-family: var(--serif);
+  font-size: clamp(21px, 4vw, 28px);
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 7px;
+}
+.screen-sub {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 300;
+  margin-bottom: 24px;
+}
+.meta-bar {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.meta-tag {
+  padding: 3px 11px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 500;
+  background: var(--sand);
+  color: var(--bark-mid);
+}
+
+.reminder {
+  background: var(--sage-soft);
+  border: 1px solid #c2d9bc;
+  border-radius: 10px;
+  padding: 11px 15px;
+  font-size: 13px;
+  color: var(--sage);
+  display: flex;
+  gap: 9px;
+  margin-bottom: 24px;
+  line-height: 1.55;
+}
+
+/* TEMPLATE CARDS */
+.tc {
+  background: var(--warm-white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.tc:hover { border-color: var(--terracotta); box-shadow: 0 4px 20px rgba(196,96,58,0.08); }
+.tc.selected {
+  border-color: var(--terracotta);
+  background: var(--terra-soft);
+  box-shadow: 0 4px 20px rgba(196,96,58,0.12);
+}
+
+.tc-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.tc-name { font-family: var(--serif); font-size: 18px; font-weight: 400; line-height: 1.2; }
+.tc-cat {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--sand);
+  color: var(--bark-mid);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.selected .tc-cat { background: var(--terracotta); color: #fff; }
+
+.tc-purpose { font-size: 13px; color: var(--muted); font-weight: 300; margin-bottom: 13px; }
+.tc-structure {
+  background: var(--cream);
+  border: 1px solid var(--sand-dark);
+  border-radius: 9px;
+  padding: 13px 15px;
+  font-size: 12.5px;
+  color: var(--bark-mid);
+  white-space: pre-wrap;
+  font-family: var(--sans);
+  line-height: 1.85;
+}
+.selected .tc-structure { background: rgba(255,252,248,0.75); }
+.tc-when { margin-top: 9px; font-size: 12px; color: var(--bark-light); font-style: italic; }
+
+/* WRITER SCREEN */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13.5px;
+  color: var(--muted);
+  cursor: pointer;
+  margin-bottom: 26px;
+  background: none;
+  border: none;
+  font-family: var(--sans);
+  padding: 0;
+}
+.back-link:hover { color: var(--bark); }
+
+.writer-panel {
+  background: var(--warm-white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.panel-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.panel-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.panel-body { padding: 18px 20px; }
+
+.fields-list { display: flex; flex-direction: column; gap: 13px; }
+.field-row label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 5px;
+}
+.field-row input,
+.field-row textarea {
+  width: 100%;
+  padding: 9px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--bark);
+  background: var(--cream);
+  outline: none;
+  transition: border-color 0.14s, box-shadow 0.14s;
+  resize: vertical;
+}
+.field-row input:focus,
+.field-row textarea:focus {
+  border-color: var(--terracotta);
+  background: var(--warm-white);
+  box-shadow: 0 0 0 3px rgba(196,96,58,0.1);
+}
+.field-row textarea { min-height: 72px; line-height: 1.6; }
+
+#output-text {
+  width: 100%;
+  min-height: 240px;
+  border: none;
+  outline: none;
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--bark);
+  background: transparent;
+  resize: vertical;
+  padding: 0;
+}
+
+.copy-flash {
+  font-size: 13px;
+  color: var(--sage);
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.copy-flash.show { opacity: 1; }
+
+.divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+@media (max-width: 500px) {
+  .option-grid.two-col { grid-template-columns: 1fr; }
+  header { padding: 36px 0 28px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <div class="logo-dot">✦</div>
+  <h1>Find your <em>Threads</em> template</h1>
+  <p>Answer three quick questions and get the right sales post structure for exactly what you are trying to say.</p>
+</header>
+
+<!-- ════════════════════════════
+     SCREEN 1: SURVEY
+════════════════════════════ -->
+<div class="screen active" id="screen-survey">
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="prog-label">Question 1 of 3</span>
+      <span id="prog-pct">33%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="prog-fill" style="width:33%"></div>
+    </div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="question-block" id="q1">
+    <div class="q-number">Question 1</div>
+    <div class="q-text">What do you need this post to do?</div>
+    <div class="q-hint">Pick the one outcome that matters most right now.</div>
+    <div class="option-grid" id="q1-grid">
+      <button class="opt" data-q="goal" data-val="build_trust">
+        <span class="opt-name">Build trust</span>
+        <span class="opt-desc">Show you understand the problem before pitching anything</span>
+      </button>
+      <button class="opt" data-q="goal" data-val="shift_belief">
+        <span class="opt-name">Shift a false belief</span>
+        <span class="opt-desc">Change what your audience thinks is causing their problem</span>
+      </button>
+      <button class="opt" data-q="goal" data-val="create_demand">
+        <span class="opt-name">Create demand</span>
+        <span class="opt-desc">Make your audience feel the real cost of staying the same</span>
+      </button>
+      <button class="opt" data-q="goal" data-val="handle_objection">
+        <span class="opt-name">Handle an objection</span>
+        <span class="opt-desc">Address the reason people hesitate before they buy</span>
+      </button>
+      <button class="opt" data-q="goal" data-val="prove_method">
+        <span class="opt-name">Prove your method works</span>
+        <span class="opt-desc">Use a result, pattern, or story to back up your approach</span>
+      </button>
+      <button class="opt" data-q="goal" data-val="invite_buy">
+        <span class="opt-name">Invite people to buy</span>
+        <span class="opt-desc">Make a clear, direct offer invitation without being pushy</span>
+      </button>
+      <button class="opt" data-q="goal" data-val="get_replies">
+        <span class="opt-name">Start a conversation</span>
+        <span class="opt-desc">Ask something that surfaces real buyer language in replies</span>
+      </button>
+      <button class="opt" data-q="goal" data-val="thought_provoking">
+        <span class="opt-name">Provoke a new thought</span>
+        <span class="opt-desc">Challenge a widespread assumption in your space</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question-block" id="q2" style="display:none">
+    <div class="q-number">Question 2</div>
+    <div class="q-text">Which buyer belief are you building?</div>
+    <div class="q-hint">Every sale stalls when one of these is missing. Pick the one your audience is weakest on.</div>
+    <div class="option-grid" id="q2-grid">
+      <button class="opt" data-q="belief" data-val="problem">
+        <span class="opt-name">Problem belief</span>
+        <span class="opt-desc">They do not fully see the problem as real or worth solving</span>
+      </button>
+      <button class="opt" data-q="belief" data-val="possibility">
+        <span class="opt-name">Possibility belief</span>
+        <span class="opt-desc">They do not believe a better outcome is possible for them</span>
+      </button>
+      <button class="opt" data-q="belief" data-val="process">
+        <span class="opt-name">Process belief</span>
+        <span class="opt-desc">They do not trust your method is the right path</span>
+      </button>
+      <button class="opt" data-q="belief" data-val="provider">
+        <span class="opt-name">Provider belief</span>
+        <span class="opt-desc">They do not trust you or your brand enough yet</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question-block" id="q3" style="display:none">
+    <div class="q-number">Question 3</div>
+    <div class="q-text">How do you want this post to feel?</div>
+    <div class="q-hint">This shapes the structure and tone of your template.</div>
+    <div class="option-grid two-col" id="q3-grid">
+      <button class="opt" data-q="tone" data-val="personal">
+        <span class="opt-name">Personal</span>
+        <span class="opt-desc">Story-led, vulnerable, relatable</span>
+      </button>
+      <button class="opt" data-q="tone" data-val="authority">
+        <span class="opt-name">Authority</span>
+        <span class="opt-desc">Pattern-based, expert, observational</span>
+      </button>
+      <button class="opt" data-q="tone" data-val="direct">
+        <span class="opt-name">Direct</span>
+        <span class="opt-desc">Clear, confident, no buildup</span>
+      </button>
+      <button class="opt" data-q="tone" data-val="curious">
+        <span class="opt-name">Curious</span>
+        <span class="opt-desc">Question-led, conversational, open-ended</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" id="btn-back" style="display:none">← Back</button>
+    <button class="btn btn-terra" id="btn-next" disabled>Continue</button>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════
+     SCREEN 2: RESULTS
+════════════════════════════ -->
+<div class="screen" id="screen-results">
+
+  <button class="back-link" id="back-to-survey">← Start over</button>
+
+  <div class="screen-title" id="r-title">Your matched templates</div>
+  <div class="screen-sub">Based on your answers. Pick one to start writing.</div>
+
+  <div class="meta-bar" id="r-meta"></div>
+
+  <div class="reminder">
+    <span style="flex-shrink:0;margin-top:1px;">◈</span>
+    <span>Strong copy creates clarity, not pressure. The goal is to help the right person see their problem and feel ready to act — not to manufacture urgency or manufacture trust.</span>
+  </div>
+
+  <div id="r-list"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-terra" id="btn-write" disabled>Write with this template →</button>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════
+     SCREEN 3: WRITER
+════════════════════════════ -->
+<div class="screen" id="screen-writer">
+
+  <button class="back-link" id="back-to-results">← Choose a different template</button>
+
+  <div class="screen-title" id="w-title">Fill in the blanks</div>
+  <div class="screen-sub">Fill in each field and your draft updates in real time. You can also edit the draft directly.</div>
+
+  <!-- INPUTS -->
+  <div class="writer-panel">
+    <div class="panel-header">
+      <span class="panel-label">Your inputs</span>
+      <button class="btn btn-ghost btn-sm" id="btn-clear-fields">Clear all</button>
+    </div>
+    <div class="panel-body">
+      <div class="fields-list" id="fields-list"></div>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="writer-panel">
+    <div class="panel-header">
+      <span class="panel-label">Your draft</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="copy-flash" id="copy-flash">✓ Copied</span>
+        <button class="btn btn-sage btn-sm" id="btn-copy-post">Copy post</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <textarea id="output-text" placeholder="Fill in the inputs above and your post will appear here. You can edit this directly too."></textarea>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div style="text-align:center;">
+    <button class="btn btn-outline" id="btn-start-over">Start over with a new template</button>
+  </div>
+
+</div>
+
+</div><!-- /app -->
+
+<script>
+'use strict';
+
+// ─────────────────────────────────────────
+// TEMPLATES
+// ─────────────────────────────────────────
+
+const T = [
+  {
+    id:'t1', name:'You Are Not Lazy', cat:'Trust Builder',
+    purpose:'Removes shame, names the real reason, and rebuilds confidence.',
+    when:'Your audience is blaming themselves for not getting results.',
+    goals:['build_trust'], beliefs:['possibility','problem'], tones:['personal','authority'],
+    structure:`You are not [negative label].
+
+You are probably [real reason].
+
+And that matters because [reframe].
+
+The fix is not [common advice].
+
+The fix is [your method].`,
+    fields:[
+      {k:'negative label',   l:'Negative label they give themselves', p:'e.g. bad at selling, inconsistent, not confident enough'},
+      {k:'real reason',      l:'The real reason they are struggling',  p:'e.g. writing content that teaches too much and positions too little'},
+      {k:'reframe',          l:'Why that reframe matters',             p:'e.g. positioning is a skill, not a personality trait'},
+      {k:'common advice',    l:'The advice that is not working',       p:'e.g. posting more often, showing up every day'},
+      {k:'your method',      l:'Your actual fix or approach',          p:'e.g. writing posts that shift beliefs instead of dump tips'}
+    ]
+  },
+  {
+    id:'t2', name:'Hidden Cost', cat:'Demand Creator',
+    purpose:'Shows the real consequence of a repeated behavior — without hype.',
+    when:'You want urgency that feels honest, not manufactured.',
+    goals:['create_demand'], beliefs:['problem'], tones:['direct','authority'],
+    structure:`Every time you [current behavior], you are not just [surface issue].
+
+You are also [hidden cost].
+
+That is why [new approach] matters.`,
+    fields:[
+      {k:'current behavior', l:'What they keep doing',             p:'e.g. posting another generic tip'},
+      {k:'surface issue',    l:'What it looks like on the surface', p:'e.g. filling your content calendar'},
+      {k:'hidden cost',      l:'The real cost underneath',          p:'e.g. training your audience to see you as a free resource'},
+      {k:'new approach',     l:'What you are pointing them toward', p:'e.g. belief-shifting content with a clear next step'}
+    ]
+  },
+  {
+    id:'t3', name:'Contrarian Truth', cat:'Belief Shifter',
+    purpose:'Positions you as a leader by disagreeing with popular advice.',
+    when:'You have a genuinely different take on something widely believed in your space.',
+    goals:['shift_belief','thought_provoking'], beliefs:['process','possibility'], tones:['authority','direct'],
+    structure:`Unpopular opinion: [contrarian belief].
+
+Most people think [common belief].
+
+But what I have seen is [your perspective].
+
+Here is what to do instead: [better path].`,
+    fields:[
+      {k:'contrarian belief', l:'Your unpopular take',           p:'e.g. educational content alone does not sell your offer'},
+      {k:'common belief',     l:'What most people believe',       p:'e.g. giving value is all you need to build trust'},
+      {k:'your perspective',  l:'What you have actually observed',p:'e.g. value without positioning creates free-content consumers'},
+      {k:'better path',       l:'What they should do instead',    p:'e.g. connect every post to a buying belief'}
+    ]
+  },
+  {
+    id:'t4', name:'Before You Buy', cat:'Objection Handler',
+    purpose:'Builds trust by pre-qualifying right-fit buyers and filtering out wrong-fit ones.',
+    when:'You want better buyers, not just more buyers.',
+    goals:['handle_objection','invite_buy'], beliefs:['provider','process'], tones:['direct','authority'],
+    structure:`Before you buy [offer type], ask yourself:
+
+[question 1]
+
+[question 2]
+
+[question 3]
+
+If yes, [your offer] may be the right fit because [reason].`,
+    fields:[
+      {k:'offer type',  l:'What kind of offer this is',   p:'e.g. a content course, a coaching package'},
+      {k:'question 1',  l:'First qualifying question',    p:'e.g. Do I need more ideas, or a system?'},
+      {k:'question 2',  l:'Second qualifying question',   p:'e.g. Am I willing to rethink how I write?'},
+      {k:'question 3',  l:'Third qualifying question',    p:'e.g. Do I want posts that actually convert?'},
+      {k:'your offer',  l:'Your offer name',              p:'e.g. the Belief-Shift Copy System'},
+      {k:'reason',      l:'Why it is the right fit for a yes', p:'e.g. it builds the conversion foundation first'}
+    ]
+  },
+  {
+    id:'t5', name:'Mistake I Made', cat:'Trust Builder',
+    purpose:'Creates relatability and credibility through honest personal story.',
+    when:'You want to build trust by being transparent about what did not work.',
+    goals:['build_trust'], beliefs:['provider'], tones:['personal'],
+    structure:`I used to think [old belief].
+
+So I did [old action].
+
+But the problem was [what went wrong].
+
+Now I [what you do instead].`,
+    fields:[
+      {k:'old belief',        l:'What you used to believe',      p:'e.g. more posting meant more sales'},
+      {k:'old action',        l:'What that belief led you to do', p:'e.g. post every single day no matter what'},
+      {k:'what went wrong',   l:'The honest lesson from it',     p:'e.g. volume without strategy just creates more noise'},
+      {k:'what you do instead',l:'Your current approach',        p:'e.g. write fewer, sharper posts that each shift a belief'}
+    ]
+  },
+  {
+    id:'t6', name:'Buyer Realization', cat:'Belief Shifter',
+    purpose:'Gently moves a reader from awareness to readiness without pressure.',
+    when:'Your audience is almost ready but needs one final reframe.',
+    goals:['shift_belief','create_demand'], beliefs:['problem','possibility'], tones:['personal','direct'],
+    structure:`At some point, you realize [painful truth].
+
+Not because [shame reframe].
+
+But because [real reason].
+
+That is when you are ready for [your solution].`,
+    fields:[
+      {k:'painful truth',    l:'The realization they eventually hit',   p:'e.g. content ideas are not the problem'},
+      {k:'shame reframe',    l:'What it is NOT about (remove shame)',   p:'e.g. you were doing it wrong this whole time'},
+      {k:'real reason',      l:'Why this realization happens',          p:'e.g. your content is not leading people to a decision'},
+      {k:'your solution',    l:'What becomes the right next step',      p:'e.g. a real conversion strategy, not just a posting schedule'}
+    ]
+  },
+  {
+    id:'t7', name:'New Mechanism', cat:'Belief Shifter',
+    purpose:'Explains why your method is different and why others have not worked.',
+    when:'Your audience has already tried other solutions and is skeptical.',
+    goals:['shift_belief','prove_method','handle_objection'], beliefs:['process'], tones:['authority','direct'],
+    structure:`The reason [common advice] is not working is because [hidden flaw].
+
+My approach is different because [what makes it different].`,
+    fields:[
+      {k:'common advice',        l:'The advice that keeps failing them', p:'e.g. better hooks alone'},
+      {k:'hidden flaw',          l:'Why that advice falls short',        p:'e.g. attention and trust are not the same thing'},
+      {k:'what makes it different',l:'Your mechanism or approach',       p:'e.g. it starts with the belief blocking the sale, not the scroll that starts it'}
+    ]
+  },
+  {
+    id:'t8', name:'Pattern Recognition', cat:'Authority Post',
+    purpose:'Demonstrates expertise by naming something you have repeatedly observed.',
+    when:'You have enough experience to spot a pattern others have not named yet.',
+    goals:['build_trust','prove_method'], beliefs:['provider','problem'], tones:['authority'],
+    structure:`After seeing [number or type] of people struggle with [problem], I noticed one pattern:
+
+[the pattern].
+
+And that usually means [what it signals].
+
+The better move is [what to do instead].`,
+    fields:[
+      {k:'number or type',   l:'How many or what type of people',   p:'e.g. dozens of clients, years of DMs, hundreds of sales calls'},
+      {k:'problem',          l:'The common struggle you observed',   p:'e.g. low-converting sales posts'},
+      {k:'the pattern',      l:'The insight you kept seeing',        p:'e.g. posts that convert make the reader rethink the problem, not just learn from it'},
+      {k:'what it signals',  l:'What that pattern means',            p:'e.g. the issue is positioning, not volume'},
+      {k:'what to do instead',l:'Your recommended next step',        p:'e.g. write one belief-shift post this week and see what changes'}
+    ]
+  },
+  {
+    id:'t9', name:'Proof Breakdown', cat:'Authority Post',
+    purpose:'Makes a result useful by explaining why it worked, not just that it did.',
+    when:'You have a result and want to turn it into a lesson, not a brag.',
+    goals:['prove_method'], beliefs:['provider','process'], tones:['authority','personal'],
+    structure:`Here is what worked: [the result].
+
+But it did not work because of [surface reason].
+
+It worked because [the real reason].
+
+Here is the lesson: [transferable insight].
+
+If you want [desired outcome], start with [first action].`,
+    fields:[
+      {k:'the result',          l:'The result you are breaking down', p:'e.g. this post brought in three buyers in 24 hours'},
+      {k:'surface reason',      l:'What it was NOT because of',       p:'e.g. the hook was clever'},
+      {k:'the real reason',     l:'What actually caused the result',  p:'e.g. it named a pain people had been carrying privately'},
+      {k:'transferable insight',l:'The lesson others can apply',      p:'e.g. specificity creates more connection than inspiration'},
+      {k:'desired outcome',     l:'What your reader wants',           p:'e.g. posts that convert'},
+      {k:'first action',        l:'Where they should start',          p:'e.g. naming the hidden pain in their next post'}
+    ]
+  },
+  {
+    id:'t10', name:'Decision Fork', cat:'Demand Creator',
+    purpose:'Helps the reader choose a path by making both options visible.',
+    when:'Your audience is stuck between their old approach and something new.',
+    goals:['create_demand','thought_provoking'], beliefs:['possibility','problem'], tones:['direct','curious'],
+    structure:`You can keep [old path], or you can [new path].
+
+One keeps creating [what stays the same].
+
+The other helps you [what becomes possible].
+
+The question is: [the decision].`,
+    fields:[
+      {k:'old path',           l:'What they are currently doing',     p:'e.g. writing tips and hoping people connect the dots'},
+      {k:'new path',           l:'The alternative you are offering',  p:'e.g. writing posts that make the buying case clear'},
+      {k:'what stays the same',l:'Result of staying on the old path', p:'e.g. passive readers who never buy'},
+      {k:'what becomes possible',l:'Result of the new path',          p:'e.g. buyers who already trust you before they click'},
+      {k:'the decision',       l:'The question you leave them with',  p:'e.g. what kind of content do you want to be remembered for?'}
+    ]
+  },
+  {
+    id:'t11', name:'Offer Bridge', cat:'Direct Invitation',
+    purpose:'Connects free content naturally to your paid solution.',
+    when:'You have given value and want to point to the next step without it feeling like a sales pivot.',
+    goals:['invite_buy'], beliefs:['provider','process'], tones:['direct','personal'],
+    structure:`If this helped you see [the realization], the next step is [your offer].
+
+Inside, we help you [the main outcome].
+
+You will [win 1], [win 2], and [win 3].
+
+[your CTA]`,
+    fields:[
+      {k:'the realization', l:'What the free content helped them see',  p:'e.g. your posts need belief shifts, not more tips'},
+      {k:'your offer',      l:'Name of your offer',                     p:'e.g. the Belief-Shift Copy System'},
+      {k:'the main outcome',l:'The core transformation inside',         p:'e.g. turn your offer into post angles people actually read'},
+      {k:'win 1',           l:'First result or feature',                p:'e.g. the 12-post framework'},
+      {k:'win 2',           l:'Second result or feature',               p:'e.g. a 30-day content challenge'},
+      {k:'win 3',           l:'Third result or feature',                p:'e.g. the ethical conversion filter'},
+      {k:'your CTA',        l:'Your call to action',                    p:'e.g. Grab the free training.'}
+    ]
+  },
+  {
+    id:'t12', name:'Identity Shift', cat:'Belief Shifter',
+    purpose:'Helps the reader see themselves differently so they act differently.',
+    when:'Your audience is clinging to an identity that is holding them back.',
+    goals:['shift_belief','thought_provoking'], beliefs:['possibility'], tones:['personal','direct'],
+    structure:`The moment you stop seeing yourself as [old identity] and start seeing yourself as [new identity], you stop [old behavior] and start [new behavior].`,
+    fields:[
+      {k:'old identity', l:'The identity keeping them stuck',       p:'e.g. a content creator who makes tips'},
+      {k:'new identity', l:'The identity that unlocks new behavior',p:'e.g. a buyer-belief builder'},
+      {k:'old behavior', l:'What the old identity produces',        p:'e.g. measuring success by views and saves'},
+      {k:'new behavior', l:'What the new identity produces',        p:'e.g. measuring success by trust and conversions'}
+    ]
+  },
+  {
+    id:'t13', name:'Question Hook', cat:'Conversation Starter',
+    purpose:'Gets replies by asking something your audience is privately wondering.',
+    when:'You want engagement and real buyer language in the comments.',
+    goals:['get_replies','shift_belief'], beliefs:['problem','possibility'], tones:['curious','personal'],
+    structure:`Have you ever wondered why [frustrating outcome] keeps happening?
+
+It may not be because [surface reason].
+
+It may be because [the deeper reason].
+
+Once you see that, the next step becomes [the shift].`,
+    fields:[
+      {k:'frustrating outcome',l:'The result they keep getting frustrated by', p:'e.g. people save your posts but never buy'},
+      {k:'surface reason',     l:'What they think is causing it',              p:'e.g. your content is not good enough'},
+      {k:'the deeper reason',  l:'What is actually causing it',                p:'e.g. your content teaches but does not lead'},
+      {k:'the shift',          l:'What changes when they see the real cause',  p:'e.g. writing posts that connect to a decision, not just a thought'}
+    ]
+  },
+  {
+    id:'t14', name:'Cost of Inaction', cat:'Demand Creator',
+    purpose:'Shows the hidden danger of staying the same — without pressure or fake urgency.',
+    when:'Your audience knows they have a problem but keeps postponing the fix.',
+    goals:['create_demand'], beliefs:['problem'], tones:['direct','authority'],
+    structure:`Most people think the danger is [obvious problem].
+
+But the real danger is [hidden consequence].
+
+Because every day you [the repeated behavior], you [the specific cost].
+
+That is why [your approach] matters.`,
+    fields:[
+      {k:'obvious problem',      l:'What they think the risk is',       p:'e.g. not posting enough'},
+      {k:'hidden consequence',   l:'The real, deeper consequence',       p:'e.g. training your audience to expect free value without ever seeing your offer as the solution'},
+      {k:'the repeated behavior',l:'What they keep doing',               p:'e.g. post tips without connecting them to a clear method'},
+      {k:'the specific cost',    l:'What that behavior costs them',      p:'e.g. you create followers who learn from you but never buy'},
+      {k:'your approach',        l:'What you offer as the alternative',  p:'e.g. a conversion strategy built into the content itself'}
+    ]
+  },
+  {
+    id:'t15', name:'Direct Invitation', cat:'Direct Invitation',
+    purpose:'A clear, confident offer for the right-fit buyer — no chasing.',
+    when:'You are ready to make a direct ask and want it to feel warm, not pushy.',
+    goals:['invite_buy'], beliefs:['provider','process'], tones:['direct'],
+    structure:`If you are [specific person] and you want [specific outcome] without [what they want to avoid], [your offer] is designed for you.
+
+Inside, you will [win 1], [win 2], and [win 3].
+
+[your CTA]`,
+    fields:[
+      {k:'specific person',       l:'Who this is for',             p:'e.g. a coach or creator who is done guessing'},
+      {k:'specific outcome',      l:'What they want to achieve',   p:'e.g. a content system that actually builds buyers'},
+      {k:'what they want to avoid',l:'What they do NOT want',      p:'e.g. burning out posting every day with nothing to show for it'},
+      {k:'your offer',            l:'Your offer name',             p:'e.g. the Belief-Shift Copy System'},
+      {k:'win 1',                 l:'First result or feature',     p:'e.g. the 12 core templates'},
+      {k:'win 2',                 l:'Second result or feature',    p:'e.g. the ethical check filter'},
+      {k:'win 3',                 l:'Third result or feature',     p:'e.g. the 30-day challenge'},
+      {k:'your CTA',              l:'Your call to action',         p:'e.g. Grab the free training.'}
+    ]
+  }
+];
+
+// ─────────────────────────────────────────
+// SCORING
+// ─────────────────────────────────────────
+
+const GW = {
+  build_trust:      {t1:5,t5:5,t8:4,t12:3,t3:2},
+  shift_belief:     {t3:5,t6:5,t7:5,t12:4,t13:3},
+  create_demand:    {t2:5,t14:5,t10:4,t6:3},
+  handle_objection: {t4:5,t7:4,t13:3,t1:2},
+  prove_method:     {t9:5,t8:5,t7:4,t3:2},
+  invite_buy:       {t11:5,t15:5,t4:4},
+  get_replies:      {t13:5,t10:4,t3:3,t6:2},
+  thought_provoking:{t3:5,t12:5,t10:4,t13:3}
+};
+
+const BW = {
+  problem:     {t1:3,t2:3,t6:3,t8:2,t13:3,t14:3,t10:2},
+  possibility: {t1:3,t6:2,t10:2,t12:4,t13:2,t3:2},
+  process:     {t7:4,t4:3,t11:2,t15:2,t9:2},
+  provider:    {t5:4,t8:3,t9:3,t4:2,t11:2,t15:2}
+};
+
+const TW = {
+  personal:   {t1:3,t5:4,t6:3,t9:2,t12:2,t11:2,t13:2},
+  authority:  {t3:3,t7:3,t8:4,t9:3,t2:2,t14:2},
+  direct:     {t4:3,t7:3,t10:3,t2:2,t14:3,t15:4,t11:2},
+  curious:    {t13:4,t10:3,t6:2,t12:2}
+};
+
+function getRecs(goal, belief, tone) {
+  const scores = {};
+  T.forEach(t => scores[t.id] = 0);
+  Object.entries(GW[goal]||{}).forEach(([id,w]) => scores[id] = (scores[id]||0) + w*2);
+  Object.entries(BW[belief]||{}).forEach(([id,w]) => scores[id] = (scores[id]||0) + w);
+  Object.entries(TW[tone]||{}).forEach(([id,w]) => scores[id] = (scores[id]||0) + w);
+  return T.filter(t => scores[t.id]>0).sort((a,b)=>scores[b.id]-scores[a.id]).slice(0,4);
+}
+
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+
+const s = { q:1, goal:null, belief:null, tone:null, tmpl:null };
+
+const GLABELS = {
+  build_trust:'Build trust', shift_belief:'Shift a false belief',
+  create_demand:'Create demand', handle_objection:'Handle an objection',
+  prove_method:'Prove your method', invite_buy:'Invite people to buy',
+  get_replies:'Start a conversation', thought_provoking:'Provoke a new thought'
+};
+const BLABELS = {
+  problem:'Problem belief', possibility:'Possibility belief',
+  process:'Process belief', provider:'Provider belief'
+};
+const TLABELS = {
+  personal:'Personal / story-led', authority:'Authority / observational',
+  direct:'Direct / confident', curious:'Curious / question-led'
+};
+
+// ─────────────────────────────────────────
+// SURVEY
+// ─────────────────────────────────────────
+
+function setProgress(q) {
+  const pct = Math.round(q/3*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+  document.getElementById('prog-label').textContent = `Question ${q} of 3`;
+}
+
+function nextQ() {
+  if (s.q===1) {
+    if (!s.goal) return;
+    hide('q1'); show('q2');
+    s.q=2;
+    document.getElementById('btn-back').style.display='inline-flex';
+    document.getElementById('btn-next').disabled = !s.belief;
+    document.getElementById('btn-next').textContent = 'Continue';
+  } else if (s.q===2) {
+    if (!s.belief) return;
+    hide('q2'); show('q3');
+    s.q=3;
+    document.getElementById('btn-next').textContent = 'Find my templates';
+    document.getElementById('btn-next').disabled = !s.tone;
+  } else if (s.q===3) {
+    if (!s.tone) return;
+    buildResults();
+  }
+  setProgress(s.q);
+}
+
+function prevQ() {
+  if (s.q===2) {
+    hide('q2'); show('q1');
+    s.q=1;
+    document.getElementById('btn-back').style.display='none';
+    document.getElementById('btn-next').textContent='Continue';
+    document.getElementById('btn-next').disabled = !s.goal;
+  } else if (s.q===3) {
+    hide('q3'); show('q2');
+    s.q=2;
+    document.getElementById('btn-next').textContent='Continue';
+    document.getElementById('btn-next').disabled = !s.belief;
+  }
+  setProgress(s.q);
+}
+
+// ─────────────────────────────────────────
+// RESULTS
+// ─────────────────────────────────────────
+
+function buildResults() {
+  const recs = getRecs(s.goal, s.belief, s.tone);
+  s.tmpl = null;
+
+  document.getElementById('r-meta').innerHTML =
+    [GLABELS[s.goal], BLABELS[s.belief], TLABELS[s.tone]]
+    .map(l=>`<span class="meta-tag">${l}</span>`).join('');
+
+  document.getElementById('r-title').textContent =
+    recs.length===1 ? 'Your best-fit template' : `${recs.length} templates matched`;
+
+  document.getElementById('r-list').innerHTML = recs.map(t=>`
+    <div class="tc" data-id="${t.id}">
+      <div class="tc-top">
+        <div class="tc-name">${t.name}</div>
+        <div class="tc-cat">${t.cat}</div>
+      </div>
+      <div class="tc-purpose">${t.purpose}</div>
+      <div class="tc-structure">${esc(t.structure)}</div>
+      <div class="tc-when">Best when: ${t.when}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('btn-write').disabled = true;
+  showScreen('screen-results');
+}
+
+function pickTemplate(id) {
+  s.tmpl = T.find(t=>t.id===id);
+  document.querySelectorAll('.tc').forEach(c=>c.classList.toggle('selected', c.dataset.id===id));
+  document.getElementById('btn-write').disabled = false;
+}
+
+// ─────────────────────────────────────────
+// WRITER
+// ─────────────────────────────────────────
+
+function goToWriter() {
+  if (!s.tmpl) return;
+  document.getElementById('w-title').textContent = s.tmpl.name;
+
+  document.getElementById('fields-list').innerHTML = s.tmpl.fields.map(f=>{
+    const isTA = f.k==='your CTA' || f.k==='what went wrong' || f.k==='the real reason' || f.k==='hidden consequence';
+    return `<div class="field-row">
+      <label for="f-${cssId(f.k)}">${f.l}</label>
+      ${isTA
+        ? `<textarea id="f-${cssId(f.k)}" placeholder="${escA(f.p)}"></textarea>`
+        : `<input type="text" id="f-${cssId(f.k)}" placeholder="${escA(f.p)}">`
+      }
+    </div>`;
+  }).join('');
+
+  document.getElementById('output-text').value = s.tmpl.structure;
+  showScreen('screen-writer');
+}
+
+function updateDraft() {
+  let text = s.tmpl.structure;
+  s.tmpl.fields.forEach(f=>{
+    const el = document.getElementById('f-'+cssId(f.k));
+    const v = el ? el.value.trim() : '';
+    if (v) {
+      const rx = new RegExp('\\['+escRx(f.k)+'\\]','gi');
+      text = text.replace(rx, v);
+    }
+  });
+  document.getElementById('output-text').value = text;
+}
+
+function clearFields() {
+  if (!s.tmpl) return;
+  s.tmpl.fields.forEach(f=>{
+    const el = document.getElementById('f-'+cssId(f.k));
+    if (el) el.value='';
+  });
+  document.getElementById('output-text').value = s.tmpl.structure;
+}
+
+function copyPost() {
+  const text = document.getElementById('output-text').value;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(()=>{
+    const el = document.getElementById('copy-flash');
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'), 2000);
+  });
+}
+
+// ─────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function startOver() {
+  s.q=1; s.goal=null; s.belief=null; s.tone=null; s.tmpl=null;
+  hide('q2'); hide('q3'); show('q1');
+  document.querySelectorAll('.opt').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('btn-back').style.display='none';
+  document.getElementById('btn-next').disabled=true;
+  document.getElementById('btn-next').textContent='Continue';
+  setProgress(1);
+  showScreen('screen-survey');
+}
+
+// ─────────────────────────────────────────
+// EVENT BINDINGS
+// ─────────────────────────────────────────
+
+function bindEvents() {
+  document.getElementById('btn-back').addEventListener('click', prevQ);
+  document.getElementById('btn-next').addEventListener('click', nextQ);
+  document.getElementById('btn-write').addEventListener('click', goToWriter);
+  document.getElementById('back-to-survey').addEventListener('click', ()=>showScreen('screen-survey'));
+  document.getElementById('back-to-results').addEventListener('click', ()=>showScreen('screen-results'));
+  document.getElementById('btn-clear-fields').addEventListener('click', clearFields);
+  document.getElementById('btn-copy-post').addEventListener('click', copyPost);
+  document.getElementById('btn-start-over').addEventListener('click', startOver);
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.opt');
+    if (!btn || !btn.dataset.q) return;
+    const q=btn.dataset.q, v=btn.dataset.val;
+    btn.closest('.option-grid').querySelectorAll('.opt').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    if (q==='goal') s.goal=v;
+    if (q==='belief') s.belief=v;
+    if (q==='tone') s.tone=v;
+    document.getElementById('btn-next').disabled = false;
+  });
+
+  document.getElementById('r-list').addEventListener('click', e => {
+    const card = e.target.closest('.tc');
+    if (!card || !card.dataset.id) return;
+    pickTemplate(card.dataset.id);
+  });
+
+  document.getElementById('fields-list').addEventListener('input', e => {
+    if (!e.target.closest('input, textarea')) return;
+    updateDraft();
+  });
+}
+
+bindEvents();
+
+// ─────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────
+
+function show(id){ document.getElementById(id).style.display='block'; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escA(s){ return String(s||'').replace(/"/g,'&quot;'); }
+function escRx(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function cssId(s){ return s.replace(/\s+/g,'-'); }
+</script>
+</body>
+</html>
